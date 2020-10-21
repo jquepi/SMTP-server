@@ -1,7 +1,18 @@
-import app from "./app";
+import {SMTPServer} from "smtp-server";
+import {simpleParser} from "mailparser";
 
-const port = 8080;
-
-app.listen(port, async () => {
-    console.log(`Server is up and running on port ${port}`);
+const server = new SMTPServer({
+    onData(stream, session, callback) {
+        simpleParser(stream, {}, (err, parsed) => {
+            if (err){
+                console.log("Error:" , err);
+            } else {
+                console.log(parsed);
+                stream.on("end", callback);
+            }
+        });
+    },
+    disabledCommands: ['AUTH']
 });
+
+server.listen(25, "");
